@@ -76,14 +76,7 @@ public class ArkanoidByKrzychu extends JFrame implements Runnable, KeyListener {
         double posDiff = (paddle.paddleX + paddle.paddleWidth/2) - (ball.ballX + ball.ballSize/2);
         if (ball.ball.intersects(paddle.paddle)) 
         {
-            System.out.println("Odbicie!");
-            System.out.println("Pr. przed odbiciem: "+ball.ballSpeed);
-            ball.ballPong(-0.06*(posDiff),-1);
-            if (ball.ballSpeed.getX() == 0 && posDiff >=0) ball.ballPong(1,-1);
-            if (ball.ballSpeed.getX() == 0 && posDiff <0) ball.ballPong(-1,-1);
-
-            System.out.println("Pr. po odbiciu: "+ball.ballSpeed);
-            System.out.println("Roznica w polozeniu: "+posDiff);
+            ball.ballHit(paddle,ball);
         }
         
         if ( ball.ballX >= borders.getMaxX()-ball.ballSize || ball.ballX < borders.getMinX() )
@@ -131,7 +124,7 @@ public class ArkanoidByKrzychu extends JFrame implements Runnable, KeyListener {
 
 class Paddle //dodatć getery i setery
 {
-    public int paddleWidth = 50; // Sparametryzować do zależnej od rozmiaru okna.
+    public int paddleWidth = 60; // Sparametryzować do zależnej od rozmiaru okna.
     public int paddleHeight = 5;
     public int paddleX = 200; // Sparametryzować do zależnej od rozmiaru okna.
     public int paddleY = 300;
@@ -171,6 +164,28 @@ class Ball
         ballX+=ballSpeed.getX();
         ballY+=ballSpeed.getY();
         ball.setBounds(ballX,ballY, ballSize/2, ballSize/2);
+    }
+    
+    public void ballHit(Paddle paddle, Ball ball)
+    {
+    final double influenceX = 0.6;
+    double ballWidth = ball.ball.getWidth();
+    double ballCenterX = ball.ball.getX() + ballWidth/2;
+    double paddleWidth = paddle.paddle.getWidth();
+    double paddleCenterX = paddle.paddle.getX() + paddleWidth/2;
+    double speedX = ball.ballSpeed.getX();
+    double speedY = ball.ballSpeed.getY();
+    
+    double speedXY = Math.sqrt(speedX*speedX + speedY*speedY);
+    
+    double posX = (ballCenterX - paddleCenterX) / (paddleWidth/2);
+    
+    speedX = speedXY * posX * influenceX;
+    
+    speedY = Math.sqrt(speedXY*speedXY - speedX*speedX) * (speedY > 0? -1 : 1);
+    
+    ball.ballSpeed.setLocation(speedX,speedY);
+
     }
     
 }
