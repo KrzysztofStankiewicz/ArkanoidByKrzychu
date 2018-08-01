@@ -2,23 +2,23 @@
 package arkanoidbykrzychu;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.scene.shape.Circle;
+import java.awt.event.*;
+import java.util.*;
 import javax.swing.*;
 
 
 public class ArkanoidByKrzychu extends JFrame implements Runnable, KeyListener {
 
-    private int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
-    private int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
+    static private int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
+    static private int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
     private GamePanel gamePanel = new GamePanel();
     private Paddle paddle = new Paddle();
     private Ball ball = new Ball();
     private Rectangle borders;
-    //private int i = 10000;
+    static int nBrickColumns = 8;
+    static int nBrickRows = 4;
+    
+    static ArrayList <Brick> bricks = new ArrayList <> (nBrickColumns * nBrickRows);;
     
     public ArkanoidByKrzychu () 
     {
@@ -35,6 +35,7 @@ public class ArkanoidByKrzychu extends JFrame implements Runnable, KeyListener {
 
         ArkanoidByKrzychu game = new ArkanoidByKrzychu();
         game.setVisible(true);
+        createBricks(nBrickColumns,nBrickRows);
         Thread thread = new Thread (game);
         thread.start();
 
@@ -76,7 +77,16 @@ public class ArkanoidByKrzychu extends JFrame implements Runnable, KeyListener {
         double posDiff = (paddle.paddleX + paddle.paddleWidth/2) - (ball.ballX + ball.ballSize/2);
         if (ball.ball.intersects(paddle.paddle)) 
         {
-            ball.ballHit(paddle,ball);
+            ball.ballHit(paddle.paddle,ball);
+        }
+        
+        for (int k = 0; k < bricks.size(); k++)
+        {
+            if (ball.ball.intersects(bricks.get(k).brick)) 
+            {
+                ball.ballHit(bricks.get(k).brick,ball);
+                bricks.set(k, new Brick());
+            }
         }
         
         if ( ball.ballX >= borders.getMaxX()-ball.ballSize || ball.ballX < borders.getMinX() )
@@ -99,6 +109,35 @@ public class ArkanoidByKrzychu extends JFrame implements Runnable, KeyListener {
 
     }
     
+    public static void  createBricks (int columns, int rows)
+     {
+        int startingPositionX = screenWidth / 2 / columns - Brick.brickWidth / 3  ;
+        int positionX = startingPositionX;
+        int index = 0;
+        for (int j = 1; j <= rows; j++)
+        {
+            for (int i = 0; i < columns; i++)
+            {
+            bricks.add(new Brick (positionX, j*50));
+            positionX+=startingPositionX;
+            }
+            positionX=startingPositionX;
+        }
+    }
+    
+    public void drawBricks (Graphics g, int columns, int rows)
+    {
+        int index = 0;
+        for (int j = 1; j <= rows; j++)
+        {
+            for (int i = 0; i < columns; i++)
+            {
+            if (bricks.get(index) != null) g.fillRect(bricks.get(index).brick.x, bricks.get(index).brick.y, bricks.get(index).brick.width, bricks.get(index).brick.height);
+            index++;
+            }
+        }
+    }
+    
     class GamePanel extends JPanel 
     {
 
@@ -115,7 +154,7 @@ public class ArkanoidByKrzychu extends JFrame implements Runnable, KeyListener {
             g.fillRect(paddle.paddleX, paddle.paddleY,paddle.paddleWidth, paddle.paddleHeight);
             g.setColor(Color.white);
             g.fillOval(ball.ballX, ball.ballY, ball.ballSize/2, ball.ballSize/2);
-
+            drawBricks(g, nBrickColumns, nBrickRows);
         }
     
     }
@@ -166,13 +205,13 @@ class Ball
         ball.setBounds(ballX,ballY, ballSize/2, ballSize/2);
     }
     
-    public void ballHit(Paddle paddle, Ball ball)
+    public void ballHit(Rectangle box, Ball ball)
     {
-    final double influenceX = 0.6;
+    final double influenceX = 0.95;
     double ballWidth = ball.ball.getWidth();
     double ballCenterX = ball.ball.getX() + ballWidth/2;
-    double paddleWidth = paddle.paddle.getWidth();
-    double paddleCenterX = paddle.paddle.getX() + paddleWidth/2;
+    double paddleWidth = box.getWidth();
+    double paddleCenterX = box.getX() + paddleWidth/2;
     double speedX = ball.ballSpeed.getX();
     double speedY = ball.ballSpeed.getY();
     
@@ -186,6 +225,24 @@ class Ball
     
     ball.ballSpeed.setLocation(speedX,speedY);
 
+    }
+    
+}
+
+class Brick 
+{
+    public static int brickWidth = 60; // Sparametryzować do zależnej od rozmiaru okna.
+    public static int brickHeight = 10;
+    public Rectangle brick;
+    
+    public Brick(int brickX, int brickY)
+    {
+        brick = new Rectangle (brickX, brickY, brickWidth, brickHeight);
+    }
+    
+        public Brick()
+    {
+        brick = new Rectangle (0,0,0,0);
     }
     
 }
