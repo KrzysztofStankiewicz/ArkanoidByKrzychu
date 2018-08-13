@@ -65,6 +65,8 @@ public class ArkanoidByKrzychu extends JFrame implements Runnable, KeyListener {
     public void keyPressed(KeyEvent ke) {
         if (ke.getKeyCode()==KeyEvent.VK_RIGHT) paddle.PaddleRight();
         if (ke.getKeyCode()==KeyEvent.VK_LEFT) paddle.PaddleLeft();
+        if (ke.getKeyCode()==KeyEvent.VK_UP) paddle.PaddleUp();
+        if (ke.getKeyCode()==KeyEvent.VK_DOWN) paddle.PaddleDown();
     }
 
     @Override
@@ -177,6 +179,16 @@ class Paddle //dodatć getery i setery
     public void PaddleLeft()
         {
             paddleX-=10;
+            paddle.setBounds(paddleX, paddleY, paddleWidth, paddleHeight);
+        }
+    public void PaddleUp()
+        {
+            paddleY-=10;
+            paddle.setBounds(paddleX, paddleY, paddleWidth, paddleHeight);
+        }
+    public void PaddleDown()
+        {
+            paddleY+=10;
             paddle.setBounds(paddleX, paddleY, paddleWidth, paddleHeight);
         }
     
